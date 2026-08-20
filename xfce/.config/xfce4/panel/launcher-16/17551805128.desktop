@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Piper
+Comment=Configurable mouse configuration utility
+Exec=piper
+Icon=org.freedesktop.Piper
+Type=Application
+StartupNotify=true
+Categories=GTK;GNOME;Utility;
+Keywords=gaming;configuration;mouse;mice;
+X-XFCE-Source=file:///usr/share/applications/org.freedesktop.Piper.desktop

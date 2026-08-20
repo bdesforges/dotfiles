@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Moonlight
+Comment=Stream games from another computer
+Exec=flatpak run com.moonlight_stream.Moonlight
+Icon=moonlight
+StartupNotify=true
+Terminal=false
+Categories=Game;
+OnlyShowIn=XFCE;

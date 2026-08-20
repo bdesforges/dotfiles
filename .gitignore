@@ -1,0 +1,27 @@
+# Shell and application history must never be committed.
+**/.zsh_history
+**/*history*
+
+# Credentials and machine-local overrides.
+**/.env
+**/.env.*
+**/*credentials*
+**/*secret*
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+
+# Nested repositories and generated files.
+**/.git/
+**/.cache/
+**/*.cache
+**/*.log
+**/*.bak
+**/*~
+**/.DS_Store
+
+# Third-party assets belong in packages or documented installers.
+**/.local/share/fonts/
+**/.local/share/icons/
+**/.themes/
