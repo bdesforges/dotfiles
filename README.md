@@ -4,6 +4,7 @@ Shared configuration for my Debian/XFCE computers. The repository keeps the
 settings I want to carry from one workstation, laptop, or VM to another:
 
 - Kitty
+- Neovim (a small general-purpose configuration with path completion)
 - Zsh and Powerlevel10k
 - Yazi
 - Rofi
@@ -19,9 +20,12 @@ Install the Debian-managed prerequisites:
 ```sh
 sudo apt update
 sudo apt install \
-  git stow kitty fonts-jetbrains-mono zsh rofi fzf eza bat duf \
+  git stow kitty fonts-jetbrains-mono zsh rofi fzf eza bat duf xsel \
   xfce4-clipman xfce4-panel
 ```
+
+Neovim itself is installed separately from the tested `.deb` build used on
+these machines. The dotfiles provide its configuration and plugin lockfile.
 
 Clone the repository anonymously over HTTPS:
 
@@ -74,6 +78,11 @@ cd ~/.dotfiles
 git pull
 ./install.sh
 ```
+
+Neovim plugins are managed independently by `lazy.nvim`. Start Neovim and run
+`:Lazy update` when you want to move to newer plugin revisions. Review the
+result, then commit the updated `nvim/.config/nvim/lazy-lock.json` so the same
+tested revisions are used on the other machines.
 
 Changes made through an application are changes to the linked files in this
 repository. Review them before committing:

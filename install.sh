@@ -2,7 +2,7 @@
 set -eu
 
 repo_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-stow_packages="kitty zsh yazi rofi xfce"
+stow_packages="kitty zsh yazi rofi xfce nvim"
 
 for command_name in git stow; do
     if ! command -v "$command_name" >/dev/null 2>&1; then
