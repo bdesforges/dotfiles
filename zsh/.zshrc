@@ -128,9 +128,15 @@ path=(
   /usr/local/go/bin
   "$HOME/go/bin"
   "$HOME/Applications"
+  /var/lib/flatpak/exports/bin
+  "$HOME/.local/share/flatpak/exports/bin"
   "${path[@]}"
 )
 export PATH
+# Flatpak apps are exposed on PATH by their app id (e.g. com.bitwarden.desktop);
+# give the ones used from a terminal a short name.
+alias bitwarden='flatpak run com.bitwarden.desktop'
+
 #. /usr/local/etc/profile.d/z.sh
 source <(fzf --zsh)
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
