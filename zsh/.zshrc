@@ -94,6 +94,10 @@ plugins=(
 
 source $ZSH/oh-my-zsh.sh
 
+# oh-my-zsh's common-aliases plugin defines duf='du -sh *', which shadows the
+# duf disk-usage tool; drop that alias so `duf` runs /usr/bin/duf.
+unalias duf 2>/dev/null
+
 # User configuration
 
 # export MANPATH="/usr/local/man:$MANPATH"
