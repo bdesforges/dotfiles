@@ -152,5 +152,7 @@ alias vi='/usr/bin/nvim'
 #alias ssh="kitty +kitten ssh"
 
 
-# Optional machine-local settings that should not contain secrets.
-[[ -r "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+# Drive Burp on 'debian' via xpra (snappy remote GUI, LAN + WAN).
+# --encoding=auto adapts to the link; --clipboard=all syncs CLIPBOARD and
+# PRIMARY (middle-click) both ways. Detach/reattach: xpra attach ssh://benoit@debian/
+alias burp='xpra start ssh://benoit@debian/ --start-child=/home/benoit/BurpSuitePro/BurpSuite --exit-with-children --encoding=auto --clipboard=all --speaker=off --microphone=off'
