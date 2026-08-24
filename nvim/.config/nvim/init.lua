@@ -131,7 +131,9 @@ require("lazy").setup({
 		end,
 	},
 }, {
-	checker = { enabled = true },
+	-- Check for plugin updates in the background but never interrupt startup
+	-- with a notification; pending updates stay visible in the :Lazy UI.
+	checker = { enabled = true, notify = false },
 	-- Keep Neovim's own runtimepath. lazy.nvim's default rtp reset guesses the
 	-- lib dir as <prefix>/lib64/nvim whenever <prefix>/lib64 exists, which is
 	-- true on Debian (ld.so symlink), so the bundled tree-sitter parsers in
