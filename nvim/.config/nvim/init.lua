@@ -132,6 +132,12 @@ require("lazy").setup({
 	},
 }, {
 	checker = { enabled = true },
+	-- Keep Neovim's own runtimepath. lazy.nvim's default rtp reset guesses the
+	-- lib dir as <prefix>/lib64/nvim whenever <prefix>/lib64 exists, which is
+	-- true on Debian (ld.so symlink), so the bundled tree-sitter parsers in
+	-- /usr/lib/nvim/parser vanish and ftplugin/markdown.lua then fails in
+	-- vim.treesitter.start().
+	performance = { rtp = { reset = false } },
 })
 
 -- vim: ts=2 sts=2 sw=2 et
