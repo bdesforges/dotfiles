@@ -15,14 +15,38 @@ done
 printf 'Repository: %s\n' "$repo_root"
 printf 'Target:     %s\n' "$HOME"
 printf 'Configs:    %s\n' "$stow_packages"
+run_stow() {
+    # Intentional word splitting of this fixed, reviewed package list.
+    # shellcheck disable=SC2086
+    stow "$@" --no-folding --dir="$repo_root" --target="$HOME" $stow_packages
+}
+
 printf '%s\n' 'Checking for conflicts with a GNU Stow dry run...'
+set +e
+dry_run=$(run_stow --simulate --verbose 2>&1)
+dry_run_status=$?
+set -e
+printf '%s\n' "$dry_run"
 
-# Intentional word splitting of this fixed, reviewed package list.
-# shellcheck disable=SC2086
-stow --simulate --verbose --no-folding \
-    --dir="$repo_root" --target="$HOME" $stow_packages
-
-printf '\nApply these configuration links? [y/N] '
+conflicts=""
+if [ "$dry_run_status" -ne 0 ]; then
+    # Stow reports a conflicting file as one of:
+    #   cannot stow X over existing target Y since neither a link nor ...
+    #   existing target is not owned by stow: Y
+    #   existing target is stowed to a different package: Y => Z
+    conflicts=$(printf '%s\n' "$dry_run" | sed -n \
+        -e 's/.*existing target \([^ ]*\) since .*/\1/p' \
+        -e 's/.*existing target is [^:]*: \([^ ]*\).*/\1/p' | sort -u)
+    if [ -z "$conflicts" ]; then
+        printf '%s\n' 'Stow dry run failed for a reason other than file conflicts; see above.' >&2
+        exit 1
+    fi
+    printf '\n%s\n' 'These existing files will be DELETED and replaced by links (no backup):'
+    printf '%s\n' "$conflicts" | sed 's/^/  /'
+    printf '\nDelete them and apply the configuration links? [y/N] '
+else
+    printf '\nApply these configuration links? [y/N] '
+fi
 read -r answer
 case "$answer" in
     y|Y|yes|YES|Yes) ;;
@@ -31,6 +55,12 @@ case "$answer" in
         exit 0
         ;;
 esac
+
+if [ -n "$conflicts" ]; then
+    printf '%s\n' "$conflicts" | while IFS= read -r relative_path; do
+        rm -f -- "$HOME/$relative_path"
+    done
+fi
 
 clone_dependency() {
     url=$1
@@ -62,9 +92,6 @@ clone_dependency \
     https://github.com/zsh-users/zsh-autosuggestions.git \
     "$HOME/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
 
-# Intentional word splitting of this fixed, reviewed package list.
-# shellcheck disable=SC2086
-stow --verbose --no-folding \
-    --dir="$repo_root" --target="$HOME" $stow_packages
+run_stow --verbose
 
 printf '%s\n' 'Dotfiles installed.'

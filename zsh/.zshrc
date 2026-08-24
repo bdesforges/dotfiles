@@ -153,6 +153,10 @@ alias vi='/usr/bin/nvim'
 
 
 # Drive Burp on 'debian' via xpra (snappy remote GUI, LAN + WAN).
-# --encoding=auto adapts to the link; --clipboard=all syncs CLIPBOARD and
-# PRIMARY (middle-click) both ways. Detach/reattach: xpra attach ssh://benoit@debian/
-alias burp='xpra start ssh://benoit@debian/ --start-child=/home/benoit/BurpSuitePro/BurpSuite --exit-with-children --encoding=auto --clipboard=all --speaker=off --microphone=off'
+# --encoding=auto adapts to the link. --clipboard=yes (the default) syncs
+# CLIPBOARD and PRIMARY (middle-click) both ways; never use 'all': xpra matches
+# that against backend class names, finds none, and silently disables clipboard.
+# setsid -f detaches the local xpra client so the prompt comes back at once
+# (same one-liner works in fish); client output goes to ~/.cache/xpra-burp.log.
+# Detach/reattach: xpra attach ssh://benoit@debian/
+alias burp='xpra start ssh://benoit@debian/ --start-child=/home/benoit/BurpSuitePro/BurpSuite --exit-with-children --encoding=auto --clipboard=yes  >/tmp/xpra-burp.log 2>&1 </dev/null'

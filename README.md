@@ -35,9 +35,10 @@ cd ~/.dotfiles
 ./install.sh
 ```
 
-The installer shows a dry run and asks before creating any links. GNU Stow
-will stop if an existing configuration file conflicts; it will not overwrite
-that file.
+The installer shows a GNU Stow dry run first. If existing files are in the
+way, it lists them and asks once for confirmation; on `y` they are deleted
+(no backup is made) and replaced by links into this repository. Answer `n` to
+leave the system untouched.
 
 Yazi is not currently supplied by the Debian repository used on these
 machines. Its configuration will still be installed and will take effect once
