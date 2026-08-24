@@ -3,17 +3,17 @@
 #
 # Usage (from the regular user's clone):   sudo ./install-root.sh
 #
-# It links root's ~/.zshrc and ~/.p10k.zsh to this repository (existing files
-# are backed up first), gives root its own oh-my-zsh checkout with the theme and
-# plugins the shared .zshrc expects, and makes zsh root's login shell. Safe to
-# re-run; it only reports what is already in place.
+# It links root's ~/.zshrc and ~/.p10k.zsh to this repository, gives root its
+# own oh-my-zsh checkout with the theme and plugins the shared .zshrc expects,
+# and makes zsh root's login shell. Like install.sh, it shows what it will do
+# and asks once; existing files in the way are deleted (no backup) on 'y'.
+# Safe to re-run; it only reports what is already in place.
 #
 # For testing, a target home directory can be passed as the first argument.
 set -eu
 
 repo_root=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 target_home=${1:-$(getent passwd root | cut -d: -f6)}
-stamp=$(date +%Y%m%d)
 
 if [ -z "${1:-}" ] && [ "$(id -u)" -ne 0 ]; then
     printf '%s\n' 'Run this with sudo: it writes to root'\''s home directory.' >&2
@@ -28,6 +28,44 @@ done
 
 printf 'Repository: %s\n' "$repo_root"
 printf 'Target:     %s\n' "$target_home"
+
+is_linked() {
+    [ -L "$2" ] && [ "$(readlink -f -- "$2")" = "$(readlink -f -- "$1")" ]
+}
+
+# Show the plan first; collect existing files that would have to go.
+conflicts=""
+plan_link() {
+    if is_linked "$1" "$2"; then
+        printf 'Present  %s -> %s\n' "$2" "$1"
+    elif [ -e "$2" ] || [ -L "$2" ]; then
+        printf 'Replace  %s -> %s\n' "$2" "$1"
+        conflicts="$conflicts$2
+"
+    else
+        printf 'Link     %s -> %s\n' "$2" "$1"
+    fi
+}
+
+plan_link "$repo_root/zsh/.zshrc" "$target_home/.zshrc"
+plan_link "$repo_root/zsh/.p10k.zsh" "$target_home/.p10k.zsh"
+
+if [ -n "$conflicts" ]; then
+    printf '\n%s\n' 'These existing files will be DELETED and replaced by links (no backup):'
+    printf '%s' "$conflicts" | sed 's/^/  /'
+    printf '\nDelete them and apply the configuration links? [y/N] '
+else
+    printf '\nApply these configuration links? [y/N] '
+fi
+read -r answer
+case "$answer" in
+    y|Y|yes|YES|Yes) ;;
+    *)
+        printf '%s\n' 'No changes applied.'
+        exit 0
+        ;;
+esac
+
 mkdir -p -- "$target_home"
 
 clone_if_missing() {
@@ -40,13 +78,12 @@ clone_if_missing() {
 }
 
 link_file() {
-    if [ -L "$2" ] && [ "$(readlink -f -- "$2")" = "$(readlink -f -- "$1")" ]; then
-        printf 'Present  %s -> %s\n' "$2" "$1"
+    if is_linked "$1" "$2"; then
         return
     fi
     if [ -e "$2" ] || [ -L "$2" ]; then
-        mv -- "$2" "$2.pre-dotfiles-$stamp"
-        printf 'Backup   %s -> %s.pre-dotfiles-%s\n' "$2" "$2" "$stamp"
+        rm -f -- "$2"
+        printf 'Deleted  %s\n' "$2"
     fi
     ln -s -- "$1" "$2"
     printf 'Linked   %s -> %s\n' "$2" "$1"

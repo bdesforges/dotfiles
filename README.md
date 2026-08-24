@@ -65,12 +65,13 @@ The root account can share the Zsh configuration. From your own clone, run:
 sudo ./install-root.sh
 ```
 
-It backs up root's existing `.zshrc` and `.p10k.zsh` (as
-`*.pre-dotfiles-<date>`), links them to the files in this repository, gives
-root its own oh-my-zsh checkout with the Powerlevel10k theme and the
-autosuggestions and syntax-highlighting plugins, and makes zsh root's login
-shell. It is safe to re-run; later `git pull`s update root's shell too because
-the files are links into this repository.
+Like `install.sh`, it shows what it will do and asks once; if root already has
+a `.zshrc` or `.p10k.zsh` in the way, they are deleted (no backup) on `y`. It
+then links both files to this repository, gives root its own oh-my-zsh checkout
+with the Powerlevel10k theme and the autosuggestions and syntax-highlighting
+plugins, and makes zsh root's login shell. It is safe to re-run; later `git
+pull`s update root's shell too because the files are links into this
+repository.
 
 ## How it works
 
