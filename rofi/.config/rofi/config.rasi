@@ -155,3 +155,8 @@ configuration {
 //@theme "/usr/share/rofi/themes/glue_pro_blue.rasi"
 //@theme "benoit-catppuccin"
 @theme "/usr/share/rofi/themes/Arc-Dark.rasi"
+
+/* Keep the launcher compact with the selected theme. */
+window {
+	width: 25%;
+}
