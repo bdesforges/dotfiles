@@ -1,0 +1,96 @@
+/*
+ * Benoit's compact Rofi theme.
+ *
+ * The palette follows the Kitty configuration (dark background, Catppuccin
+ * Mocha-like blue/lavender accents). It intentionally uses an opaque window
+ * and no blur so the launcher stays responsive on Xfce.
+ */
+
+* {
+    background-color: #1d1d24;
+    border-color:     #45475a;
+    text-color:       #cdd6f4;
+    muted-color:      #a6adc8;
+    accent-color:     #89b4fa;
+    selection-color:  #b4befe;
+    selection-text:   #1e1e2e;
+    surface-color:    #313244;
+    spacing:          0;
+    font:             "JetBrains Mono 11";
+}
+
+window {
+    width:            38%;
+    border:           1px;
+    border-radius:    12px;
+    background-color: @background-color;
+    border-color:     @border-color;
+    padding:          16px;
+}
+
+mainbox {
+    children: [ inputbar, listview ];
+    spacing: 12px;
+}
+
+inputbar {
+    children: [ prompt, entry ];
+    spacing: 8px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background-color: @surface-color;
+}
+
+prompt {
+    text-color: @accent-color;
+}
+
+entry {
+    text-color: @text-color;
+    placeholder: "Search";
+    placeholder-color: @muted-color;
+}
+
+listview {
+    lines: 8;
+    columns: 1;
+    spacing: 4px;
+    scrollbar: false;
+    fixed-height: false;
+}
+
+element {
+    orientation: horizontal;
+    padding: 8px;
+    border-radius: 7px;
+    spacing: 10px;
+}
+
+element-icon {
+    size: 24px;
+}
+
+element-text {
+    vertical-align: 0.5;
+    text-color: @text-color;
+}
+
+element selected.normal {
+    background-color: @selection-color;
+}
+
+element selected.normal element-text {
+    text-color: @selection-text;
+}
+
+element alternate.normal {
+    background-color: #252530;
+}
+
+scrollbar {
+    width: 4px;
+    handle-width: 4px;
+    handle-color: @accent-color;
+    border: 0;
+    padding: 0;
+}
