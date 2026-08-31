@@ -1,7 +1,7 @@
 configuration {
 	modes: "drun,run,ssh,window,filebrowser,keys,window,combi";
 	/*modes: "window,drun,run,ssh,window,filebrowser,keys,combi";*/
-	font: "JetBrains Mono 11";
+	font: "JetBrains Mono 13";
 /*	location: 0;*/
 /*	yoffset: 0;*/
 /*	xoffset: 0;*/
@@ -159,4 +159,13 @@ configuration {
 /* Keep the launcher compact with the selected theme. */
 window {
 	width: 25%;
+	font: "JetBrains Mono 13";
+}
+
+element-icon {
+	size: 2em;
+}
+
+element {
+	padding: 5px;
 }
