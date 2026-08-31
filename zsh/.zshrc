@@ -134,6 +134,7 @@ path=(
   "$HOME/Applications"
   /var/lib/flatpak/exports/bin
   "$HOME/.local/share/flatpak/exports/bin"
+  "$HOME/.local/share/pi-node/node-v22.23.2-linux-x64/bin"
   "${path[@]}"
 )
 export PATH
@@ -160,3 +161,12 @@ alias vi='/usr/bin/nvim'
 # (same one-liner works in fish); client output goes to ~/.cache/xpra-burp.log.
 # Detach/reattach: xpra attach ssh://benoit@debian/
 alias burp='xpra start ssh://benoit@debian/ --start-child=/home/benoit/BurpSuitePro/BurpSuite --exit-with-children --encoding=auto --clipboard=yes  >/tmp/xpra-burp.log 2>&1 </dev/null'
+
+# Point pi's llama-cpp extension at the Ollama server on rufus so pi auto-discovers
+# whatever Ollama currently serves (also silences its localhost:8080 probe).
+# Curated 128K/thinking entries live in ~/.pi/agent/models.json (provider "ollama").
+export LLAMA_BASE_URL="http://rufus:11434/v1"
+
+# Run pi (coding agent) in a throwaway, Ollama-wired Docker container. No host
+# config files; pi state persists in the 'pi-agent-home' docker volume.
+alias pi-docker='/home/benoit/Documents/pi/pi-dockerized-container.sh'
