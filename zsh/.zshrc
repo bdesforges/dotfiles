@@ -146,7 +146,7 @@ alias bitwarden='flatpak run com.bitwarden.desktop'
 source <(fzf --zsh)
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-alias 'ls'='eza --icons'
+alias 'ls'='eza --icons=auto'
 alias cat="batcat -p"
 alias ip='ip --color'
 alias vi='/usr/bin/nvim'
