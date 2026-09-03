@@ -1,12 +1,17 @@
 #!/bin/sh
-# Give the root account the same Zsh configuration as the regular user.
+# Give the root account the same Zsh and Neovim configuration as the regular
+# user.
 #
 # Usage (from the regular user's clone):   sudo ./install-root.sh
 #
-# It links root's ~/.zshrc and ~/.p10k.zsh to this repository, gives root its
-# own oh-my-zsh checkout with the theme and plugins the shared .zshrc expects,
-# and makes zsh root's login shell. Like install.sh, it shows what it will do
-# and asks once; existing files in the way are deleted (no backup) on 'y'.
+# It links root's ~/.zshrc, ~/.p10k.zsh and ~/.config/nvim/init.lua to this
+# repository, gives root its own oh-my-zsh checkout with the theme and plugins
+# the shared .zshrc expects, copies lazy-lock.json into root's own
+# ~/.config/nvim (a copy, not a link, so root's plugin state never touches the
+# repository's lockfile), installs root's own copy of the Neovim plugins at
+# the pinned commits, and makes zsh root's login shell. Like install.sh, it
+# shows what it will do and asks once; existing files in the way are deleted
+# (no backup) on 'y'.
 # Safe to re-run; it only reports what is already in place.
 #
 # For testing, a target home directory can be passed as the first argument.
@@ -19,7 +24,7 @@ if [ -z "${1:-}" ] && [ "$(id -u)" -ne 0 ]; then
     printf '%s\n' 'Run this with sudo: it writes to root'\''s home directory.' >&2
     exit 1
 fi
-for command_name in git zsh; do
+for command_name in git zsh nvim; do
     if ! command -v "$command_name" >/dev/null 2>&1; then
         printf 'Missing required command: %s\n' "$command_name" >&2
         exit 1
@@ -48,14 +53,40 @@ plan_link() {
 }
 
 plan_link "$repo_root/zsh/.zshrc" "$target_home/.zshrc"
+is_copy() {
+    [ -f "$2" ] && [ ! -L "$2" ] && cmp -s -- "$1" "$2"
+}
+plan_copy() {
+    if is_copy "$1" "$2"; then
+        printf 'Present  %s (copy of %s)\n' "$2" "$1"
+    elif [ -e "$2" ] || [ -L "$2" ]; then
+        printf 'Replace  %s <- %s\n' "$2" "$1"
+        conflicts="$conflicts$2
+"
+    else
+        printf 'Copy     %s <- %s\n' "$2" "$1"
+    fi
+}
+
+nvim_dir="$target_home/.config/nvim"
 plan_link "$repo_root/zsh/.p10k.zsh" "$target_home/.p10k.zsh"
+if [ -L "$nvim_dir" ]; then
+    # A linked directory would make the two checks below see the repository's
+    # own files and report them as already in place.
+    printf 'Replace  %s (link) with a directory\n' "$nvim_dir"
+    conflicts="$conflicts$nvim_dir
+"
+else
+    plan_link "$repo_root/nvim/.config/nvim/init.lua" "$nvim_dir/init.lua"
+    plan_copy "$repo_root/nvim/.config/nvim/lazy-lock.json" "$nvim_dir/lazy-lock.json"
+fi
 
 if [ -n "$conflicts" ]; then
-    printf '\n%s\n' 'These existing files will be DELETED and replaced by links (no backup):'
+    printf '\n%s\n' 'These existing files will be DELETED and replaced (no backup):'
     printf '%s' "$conflicts" | sed 's/^/  /'
-    printf '\nDelete them and apply the configuration links? [y/N] '
+    printf '\nDelete them and apply the configuration? [y/N] '
 else
-    printf '\nApply these configuration links? [y/N] '
+    printf '\nApply the configuration? [y/N] '
 fi
 read -r answer
 case "$answer" in
@@ -89,6 +120,18 @@ link_file() {
     printf 'Linked   %s -> %s\n' "$2" "$1"
 }
 
+copy_file() {
+    if is_copy "$1" "$2"; then
+        return
+    fi
+    if [ -e "$2" ] || [ -L "$2" ]; then
+        rm -f -- "$2"
+        printf 'Deleted  %s\n' "$2"
+    fi
+    cp -- "$1" "$2"
+    printf 'Copied   %s <- %s\n' "$2" "$1"
+}
+
 omz="$target_home/.oh-my-zsh"
 clone_if_missing https://github.com/ohmyzsh/ohmyzsh.git "$omz"
 clone_if_missing https://github.com/romkatv/powerlevel10k.git "$omz/custom/themes/powerlevel10k"
@@ -97,6 +140,13 @@ clone_if_missing https://github.com/zsh-users/zsh-syntax-highlighting.git "$omz/
 
 link_file "$repo_root/zsh/.zshrc" "$target_home/.zshrc"
 link_file "$repo_root/zsh/.p10k.zsh" "$target_home/.p10k.zsh"
+if [ -L "$nvim_dir" ]; then
+    rm -f -- "$nvim_dir"
+    printf 'Deleted  %s\n' "$nvim_dir"
+fi
+mkdir -p -- "$nvim_dir"
+link_file "$repo_root/nvim/.config/nvim/init.lua" "$nvim_dir/init.lua"
+copy_file "$repo_root/nvim/.config/nvim/lazy-lock.json" "$nvim_dir/lazy-lock.json"
 
 if [ -z "${1:-}" ]; then
     zsh_path=$(command -v zsh)
@@ -110,3 +160,10 @@ fi
 
 printf 'Checking that the configuration loads...\n'
 HOME=$target_home zsh -ilc 'printf "OK       zsh %s, theme %s, plugins: %s\n" "$ZSH_VERSION" "$ZSH_THEME" "${plugins[*]}"' </dev/null
+
+# Root has its own plugin checkout under its data directory and its own copy of
+# lazy-lock.json. 'restore' (not 'install') puts every plugin, including
+# lazy.nvim itself, at the commit pinned in that lockfile.
+printf 'Installing the pinned Neovim plugins (first run needs network)...\n'
+HOME=$target_home nvim --headless "+Lazy! restore" +qa
+HOME=$target_home nvim --headless -c 'lua io.write(string.format("OK       %s, %d plugins installed\n", vim.fn.execute("version"):match("NVIM v%S+"), #require("lazy").plugins()))' +qa

@@ -57,21 +57,29 @@ chsh -s "$(command -v zsh)"
 
 Log out and back in after changing the login shell.
 
-## Give root the same shell
+## Give root the same shell and editor
 
-The root account can share the Zsh configuration. From your own clone, run:
+The root account can share the Zsh and Neovim configuration. From your own
+clone, run:
 
 ```sh
 sudo ./install-root.sh
 ```
 
 Like `install.sh`, it shows what it will do and asks once; if root already has
-a `.zshrc` or `.p10k.zsh` in the way, they are deleted (no backup) on `y`. It
-then links both files to this repository, gives root its own oh-my-zsh checkout
-with the Powerlevel10k theme and the autosuggestions and syntax-highlighting
-plugins, and makes zsh root's login shell. It is safe to re-run; later `git
-pull`s update root's shell too because the files are links into this
-repository.
+a `.zshrc`, `.p10k.zsh` or `.config/nvim/init.lua` in the way, they are deleted
+(no backup) on `y`. It then links those three files to this repository, gives
+root its own oh-my-zsh checkout with the Powerlevel10k theme and the
+autosuggestions and syntax-highlighting plugins, copies `lazy-lock.json` into
+root's own `.config/nvim`, installs root's own copy of the Neovim plugins at
+the commits pinned there, and makes zsh root's login shell. It is safe to
+re-run.
+
+Because the shell and editor configuration are links, root follows later `git
+pull`s. The lockfile is a copy on purpose: root's plugin state never touches
+this repository. If you add a plugin to `init.lua`, root installs it at its
+latest commit on its next start; re-run the script after updating plugins to
+put root's copy back on the pinned commits.
 
 ## How it works
 
