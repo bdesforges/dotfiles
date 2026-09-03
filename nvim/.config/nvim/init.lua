@@ -67,6 +67,22 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 	end,
 })
 
+-- Make sure tree-sitter highlighting runs for Markdown. Neovim 0.13's bundled
+-- ftplugin/markdown.lua already starts it; 0.12 (laptop) does not, and
+-- render-markdown.nvim relies on it to conceal inline markup. Scheduled so it
+-- runs after the ftplugin and becomes a no-op where Neovim did the work.
+vim.api.nvim_create_autocmd("FileType", {
+	group = vim.api.nvim_create_augroup("user-markdown-treesitter", { clear = true }),
+	pattern = "markdown",
+	callback = function(args)
+		vim.schedule(function()
+			if vim.api.nvim_buf_is_valid(args.buf) and not vim.treesitter.highlighter.active[args.buf] then
+				pcall(vim.treesitter.start, args.buf)
+			end
+		end)
+	end,
+})
+
 -- Install lazy.nvim when this is first used on a new machine.
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
@@ -119,7 +135,26 @@ require("lazy").setup({
 			require("mini.ai").setup({ n_lines = 500 })
 			require("mini.surround").setup()
 			require("mini.statusline").setup({ use_icons = false })
+			-- Only consumer is render-markdown.nvim (code block language icons).
+			require("mini.icons").setup()
 		end,
+	},
+
+	-- Render Markdown in place (headings, lists, checkboxes, tables, code
+	-- blocks) in normal mode; insert and visual mode show the raw text, as does
+	-- the cursor line. Uses Neovim's bundled markdown parsers, so it needs no
+	-- nvim-treesitter plugin.
+	{
+		"MeanderingProgrammer/render-markdown.nvim",
+		ft = { "markdown" },
+		dependencies = { "echasnovski/mini.nvim" },
+		-- Neovim bundles no html, latex, or yaml parsers; these are off so
+		-- :checkhealth render-markdown stays clean.
+		opts = {
+			html = { enabled = false },
+			latex = { enabled = false },
+			yaml = { enabled = false },
+		},
 	},
 
 	{
