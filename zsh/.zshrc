@@ -152,6 +152,23 @@ alias ip='ip --color'
 alias vi='/usr/bin/nvim'
 #alias ssh="kitty +kitten ssh"
 
+# Restore local terminal state if an SSH session disconnects before the
+# remote application can send its terminal cleanup sequence.
+ssh() {
+  local tty_state
+  tty_state=$(stty -g < /dev/tty 2>/dev/null) || tty_state=
+
+  kitty +kitten ssh "$@"
+  local ssh_status=$?
+
+  if [[ -n $tty_state ]]; then
+    stty "$tty_state" < /dev/tty 2>/dev/null
+    print -rn -- $'\e[<u\e[?1l\e[?25h\e[0m' > /dev/tty 2>/dev/null
+  fi
+
+  return $ssh_status
+}
+
 
 # Drive Burp on 'debian' via xpra (snappy remote GUI, LAN + WAN).
 # --encoding=auto adapts to the link. --clipboard=yes (the default) syncs
