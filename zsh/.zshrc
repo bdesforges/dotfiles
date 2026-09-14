@@ -159,7 +159,9 @@ ssh() {
   local tty_state
   tty_state=$(stty -g < /dev/tty 2>/dev/null) || tty_state=
 
-  if [[ ( $TERM == xterm-kitty || -n ${KITTY_WINDOW_ID:-} ) && -x ${commands[kitty]:-} ]]; then
+  if [[ ${HERDR_ENV:-} != 1 &&
+        ( $TERM == xterm-kitty || -n ${KITTY_WINDOW_ID:-} ) &&
+        -x ${commands[kitty]:-} ]]; then
     kitty +kitten ssh "$@"
   else
     command /usr/bin/ssh "$@"
