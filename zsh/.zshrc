@@ -154,12 +154,14 @@ alias vi='/usr/bin/nvim'
 
 # Restore local terminal state if an SSH session disconnects before the
 # remote application can send its terminal cleanup sequence. Use Kitty's
-# SSH kitten only from Kitty; retain plain SSH for Linux consoles and TTYs.
+# SSH kitten only from a direct Kitty window; retain plain SSH for consoles,
+# TTYs, and terminal multiplexers such as Byobu, tmux, and screen.
 ssh() {
   local tty_state
   tty_state=$(stty -g < /dev/tty 2>/dev/null) || tty_state=
 
   if [[ ${HERDR_ENV:-} != 1 &&
+        -z ${BYOBU_BACKEND:-} && -z ${TMUX:-} && -z ${STY:-} &&
         ( $TERM == xterm-kitty || -n ${KITTY_WINDOW_ID:-} ) &&
         -x ${commands[kitty]:-} ]]; then
     kitty +kitten ssh "$@"
