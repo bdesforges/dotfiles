@@ -152,27 +152,20 @@ alias ip='ip --color'
 alias vi='/usr/bin/nvim'
 #alias ssh="kitty +kitten ssh"
 
-# Restore local terminal state if an SSH session disconnects before the
-# remote application can send its terminal cleanup sequence. Use Kitty's
-# SSH kitten only from a direct Kitty window; retain plain SSH for consoles,
-# TTYs, and terminal multiplexers such as Byobu, tmux, and screen.
+# Restore local terminal state if an SSH session drops before the remote app
+# can send its cleanup sequence (saves typing `reset`): tty modes, Kitty
+# keyboard protocol, cursor keys, cursor visibility, colours. Plain ssh on
+# purpose: works in Kitty, Herdr, tmux, nested hops and the console alike.
 ssh() {
-  local tty_state
-  tty_state=$(stty -g < /dev/tty 2>/dev/null) || tty_state=
+  local tty_state=
+  [[ -t 0 && -t 1 ]] && tty_state=$(stty -g 2>/dev/null)
 
-  if [[ ${HERDR_ENV:-} != 1 &&
-        -z ${BYOBU_BACKEND:-} && -z ${TMUX:-} && -z ${STY:-} &&
-        ( $TERM == xterm-kitty || -n ${KITTY_WINDOW_ID:-} ) &&
-        -x ${commands[kitty]:-} ]]; then
-    kitty +kitten ssh "$@"
-  else
-    command /usr/bin/ssh "$@"
-  fi
+  command ssh "$@"
   local ssh_status=$?
 
   if [[ -n $tty_state ]]; then
-    stty "$tty_state" < /dev/tty 2>/dev/null
-    print -rn -- $'\e[<u\e[?1l\e[?25h\e[0m' > /dev/tty 2>/dev/null
+    stty "$tty_state" 2>/dev/null
+    print -rn -- $'\e[<u\e[?1l\e[?25h\e[0m'
   fi
 
   return $ssh_status
