@@ -9,6 +9,7 @@ settings I want to carry from one workstation, laptop, or VM to another:
 - Yazi
 - Rofi
 - selected XFCE panel launchers and Clipman actions
+- a few XFCE settings applied with `xfconf-query` (Win+E opens a new Thunar window)
 
 It deliberately does not contain passwords, shell history, browser profiles,
 display layouts, or complete machine-specific XFCE sessions.
@@ -93,8 +94,11 @@ and zsh-autosuggestions directly from their upstream Git repositories. It does
 not run downloaded installation scripts.
 
 The XFCE directory contains supporting panel launcher files and Clipman
-actions. It does not replace the panel layout, display configuration, power
-settings, or saved desktop session on a new computer.
+actions. `install.sh` also sets a few xfconf properties (currently the Win+E
+shortcut, `thunar --window`) when an XFCE session is reachable; xfconfd rewrites
+its XML files, so those are set rather than stowed. It does not replace the
+panel layout, display configuration, power settings, or saved desktop session
+on a new computer.
 
 ## Update an existing computer
 

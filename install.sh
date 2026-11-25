@@ -94,4 +94,22 @@ clone_dependency \
 
 run_stow --verbose
 
+# XFCE settings stored in xfconf rather than in a linked file. xfconfd rewrites
+# its XML files, so they are set with xfconf-query instead of being stowed.
+# Skipped when xfconf-query or a session D-Bus is unavailable.
+apply_xfconf() {
+    command -v xfconf-query >/dev/null 2>&1 || return 0
+    if ! xfconf-query -c xfce4-keyboard-shortcuts -l >/dev/null 2>&1; then
+        printf '%s\n' 'Skipping XFCE settings: xfconf is not reachable.'
+        return 0
+    fi
+    # Win+E: always a new Thunar window on the current workspace, even when
+    # "Open new thunar instances as tabs" is on.
+    xfconf-query -c xfce4-keyboard-shortcuts -p '/commands/custom/<Super>e' \
+        -n -t string -s 'thunar --window'
+    printf '%s\n' 'XFCE settings applied.'
+}
+
+apply_xfconf
+
 printf '%s\n' 'Dotfiles installed.'
